@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 
-// Initialize the SDK. Vercel will inject your API key from its environment variables.
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function POST(req: Request) {
@@ -13,11 +12,17 @@ export async function POST(req: Request) {
     }
 
     const prompt = `
-    You are an expert product strategist for digital creators. Your job is to analyze the following raw audience comments and identify their deepest, most recurring pain points. 
+    You are an expert product strategist for digital creators. Analyze the following raw audience comments and identify their deepest, most recurring pain points. 
     
-    Based on these pain points, generate exactly 3 highly validated, specific digital product ideas that the creator could instantly build and sell (like an ebook, a notion template, a 5-day email course, or a mini-video guide).
+    Generate exactly 3 highly validated digital product ideas.
     
-    Return the result as a strict JSON array of objects with exactly these keys: "title", "description", and "painPoint".
+    Return the result as a strict JSON array of objects with exactly these keys: 
+    - "title"
+    - "description"
+    - "painPoint"
+    - "suggestedPrice" (a realistic dollar amount based on the value, e.g., "$27")
+    - "firstActionStep" (a 1-sentence instruction on the very first thing the creator should do to start building this today)
+    
     Do not include any markdown formatting like \`\`\`json in the output. Just the raw, valid JSON array.
     
     Comments to analyze:
@@ -30,8 +35,6 @@ export async function POST(req: Request) {
     });
 
     const responseText = response.text || "[]";
-    
-    // Clean up any markdown wrappers the AI might add
     const cleanJson = responseText.replace(/```json/g, "").replace(/```/g, "").trim();
     const ideas = JSON.parse(cleanJson);
 
