@@ -1,34 +1,44 @@
 import { NextResponse } from "next/server";
+import { GoogleGenAI } from "@google/genai";
+
+// Initialize the SDK. Vercel will inject your API key from its environment variables.
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { text } = body;
+    const { text } = await req.json();
 
-    // Simulate AI processing delay
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    if (!text) {
+      return NextResponse.json({ error: "No text provided" }, { status: 400 });
+    }
 
-    // Simulated AI response based on the "PainMiner" concept
-    const mockIdeas = [
-      {
-        title: "The 5-Day Burnout Reset",
-        description: "A step-by-step checklist and daily audio guide to recovering energy without quitting your job.",
-        painPoint: "Audience repeatedly mentions feeling exhausted and overwhelmed.",
-      },
-      {
-        title: "Focus Flow Templates",
-        description: "Plug-and-play Notion templates designed specifically for ADHD brains to track daily tasks.",
-        painPoint: "Users commenting about inability to stick to standard planners.",
-      },
-      {
-        title: "Cold Email Conversion Kit",
-        description: "3 proven email scripts that get clients to reply, including objection-handling frameworks.",
-        painPoint: "Freelancers complaining about sending pitches and hearing crickets.",
-      }
-    ];
+    const prompt = `
+    You are an expert product strategist for digital creators. Your job is to analyze the following raw audience comments and identify their deepest, most recurring pain points. 
+    
+    Based on these pain points, generate exactly 3 highly validated, specific digital product ideas that the creator could instantly build and sell (like an ebook, a notion template, a 5-day email course, or a mini-video guide).
+    
+    Return the result as a strict JSON array of objects with exactly these keys: "title", "description", and "painPoint".
+    Do not include any markdown formatting like \`\`\`json in the output. Just the raw, valid JSON array.
+    
+    Comments to analyze:
+    "${text}"
+    `;
 
-    return NextResponse.json({ ideas: mockIdeas });
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+    });
+
+    const responseText = response.text || "[]";
+    
+    // Clean up any markdown wrappers the AI might add
+    const cleanJson = responseText.replace(/```json/g, "").replace(/```/g, "").trim();
+    const ideas = JSON.parse(cleanJson);
+
+    return NextResponse.json({ ideas });
+    
   } catch (error) {
+    console.error("AI Processing Error:", error);
     return NextResponse.json({ error: "Failed to process text" }, { status: 500 });
   }
 }
