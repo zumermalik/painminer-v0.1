@@ -58,7 +58,7 @@ export default function Home() {
       </div>
 
       <div className="flex flex-col gap-6">
-        {/* NEW: API Key Input Section */}
+        {/* THIS IS THE MISSING API KEY SECTION */}
         <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
           <div className="space-y-1">
             <label className="text-sm font-bold flex items-center gap-2">
