@@ -20,7 +20,7 @@ why? because they built what *they* wanted to teach, not the specific pain point
 
 the biggest goldmine for product ideas is the comment section. but reading and categorizing 500 comments by hand is a nightmare. that was the unlock for me. so i built this tool to let ai do the heavy lifting, analyze the friction, and spit out exactly what the creator should build today.
 
-![image-1](painminer-1.png)
+![image-1](assets/painminer-1.png)
 
 ### what it does
 
@@ -50,7 +50,7 @@ the biggest goldmine for product ideas is the comment section. but reading and c
 * custom prompt engineering forces the ai into a strict product-strategist persona
 * outputs clean, actionable cards: title, description, core pain solved, price tag, and next step
 
-![image-2](painminer-2.png)
+![image-2](assets/painminer-2.png)
 
 ### tradeoffs
 
@@ -58,7 +58,7 @@ the biggest goldmine for product ideas is the comment section. but reading and c
 * **garbage in, garbage out:** if you paste in comments from a video that only says "fire emoji" or "first," the ai can't invent a pain point. it needs actual engagement to work.
 * **no database:** there is no local storage or cloud database in this version. once you refresh the page, your generated ideas are gone. screenshot them or build them!
 
-![image-3](painminer-3.png)
+![image-3](assets/painminer-3.png)
 
 ### setup (local / dev)
 

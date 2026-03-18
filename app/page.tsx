@@ -1,25 +1,35 @@
 "use client"
 import { useState } from "react";
-import { Loader2, TrendingUp, ExternalLink, Zap } from "lucide-react";
+import { Loader2, TrendingUp, ExternalLink, Zap, Key } from "lucide-react";
 
 export default function Home() {
   const [input, setInput] = useState("");
+  const [apiKey, setApiKey] = useState("");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<any[] | null>(null);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handleAnalyze = async () => {
-    if (!input) return;
+    if (!input || !apiKey) return;
     setLoading(true);
+    setErrorMsg("");
     
     try {
       const response = await fetch("/api/analyze", {
         method: "POST",
-        body: JSON.stringify({ text: input }),
+        body: JSON.stringify({ text: input, apiKey: apiKey }),
       });
+      
       const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to analyze");
+      }
+      
       setResults(data.ideas);
-    } catch (error) {
-      console.error("Failed to analyze", error);
+    } catch (error: any) {
+      console.error("Analysis failed", error);
+      setErrorMsg(error.message);
     } finally {
       setLoading(false);
     }
@@ -32,7 +42,6 @@ export default function Home() {
         <p className="text-gray-500 dark:text-gray-400">Paste your raw TikTok, IG, or YouTube comments below to uncover what your audience actually wants to buy.</p>
       </div>
 
-      {/* NEW: The Interactive Guide Banner */}
       <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h4 className="font-semibold text-blue-900 dark:text-blue-300">Don't want to copy-paste manually?</h4>
@@ -48,23 +57,48 @@ export default function Home() {
         </a>
       </div>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-6">
+        {/* NEW: API Key Input Section */}
+        <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
+          <div className="space-y-1">
+            <label className="text-sm font-bold flex items-center gap-2">
+              <Key className="h-4 w-4 text-primary" /> Gemini API Key
+            </label>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              To keep this tool free without usage limits, PainMiner runs entirely on your own API key. You can get a free key from Google AI Studio.
+            </p>
+          </div>
+          <input 
+            type="password"
+            placeholder="AIzaSy..."
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+            className="w-full p-3 rounded-lg border border-[var(--border)] bg-[var(--background)] focus:ring-2 focus:ring-primary outline-none transition-all text-sm font-mono"
+          />
+        </div>
+
         <textarea 
           className="w-full min-h-[200px] p-4 rounded-xl border border-[var(--border)] bg-[var(--card)] focus:ring-2 focus:ring-primary outline-none transition-all resize-y"
           placeholder="Paste exported comments here..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
         />
+
+        {errorMsg && (
+          <div className="text-red-500 text-sm font-medium bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 p-3 rounded-lg">
+            {errorMsg}
+          </div>
+        )}
+
         <button 
           onClick={handleAnalyze}
-          disabled={loading || !input}
+          disabled={loading || !input || !apiKey}
           className="bg-primary text-white py-3 px-6 rounded-lg font-medium hover:bg-primary-dark transition-colors disabled:opacity-50 flex items-center justify-center gap-2 w-fit"
         >
           {loading ? <Loader2 className="animate-spin h-5 w-5" /> : "Analyze Audience Pains"}
         </button>
       </div>
 
-      {/* UPDATED: Richer Output Cards */}
       {results && (
         <div className="mt-8 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <h3 className="text-2xl font-semibold flex items-center gap-2">

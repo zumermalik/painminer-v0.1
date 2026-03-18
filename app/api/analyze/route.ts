@@ -1,15 +1,19 @@
 import { NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
 export async function POST(req: Request) {
   try {
-    const { text } = await req.json();
+    const { text, apiKey } = await req.json();
 
     if (!text) {
       return NextResponse.json({ error: "No text provided" }, { status: 400 });
     }
+    if (!apiKey) {
+      return NextResponse.json({ error: "No API key provided" }, { status: 400 });
+    }
+
+    // Initialize the SDK using the user's provided API key
+    const ai = new GoogleGenAI({ apiKey: apiKey });
 
     const prompt = `
     You are an expert product strategist for digital creators. Analyze the following raw audience comments and identify their deepest, most recurring pain points. 
@@ -42,6 +46,7 @@ export async function POST(req: Request) {
     
   } catch (error) {
     console.error("AI Processing Error:", error);
-    return NextResponse.json({ error: "Failed to process text" }, { status: 500 });
+    // If it fails here, it's highly likely their API key is invalid
+    return NextResponse.json({ error: "Failed to process text. Please verify your Gemini API key is correct." }, { status: 500 });
   }
 }
